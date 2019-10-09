@@ -1,0 +1,22 @@
+server:
+  port: 8888
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1s
+        min-idle: 0
+        max-idle: 8
+  application:
+    name: user-auth
+  datasource:
+    url: jdbc:mysql://localhost:3306/common_user?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
+    username: root
+    password: root123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+
