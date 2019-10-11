@@ -1,6 +1,6 @@
 package com.xinao.config;
 
-import com.xinao.exception.CustomWebResponseExceptionTranslator;
+
 import com.xinao.service.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,38 +41,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private TokenStore tokenStore;
 
-    @Autowired
-    private CustomWebResponseExceptionTranslator customWebResponseExceptionTranslator;
-
-
-//    @Override
-//    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-//        clients.withClientDetails(clientDetails());
-//       /* clients.inMemory()
-//                .withClient("XcWebApp")//客户端id
-//                .secret("XcWebApp")//密码，要保密
-//                .accessTokenValiditySeconds(60)//访问令牌有效期
-//                .refreshTokenValiditySeconds(60)//刷新令牌有效期
-//                //授权客户端请求认证服务的类型authorization_code：根据授权码生成令牌，
-//                // client_credentials:客户端认证，refresh_token：刷新令牌，password：密码方式认证
-//                .authorizedGrantTypes("authorization_code", "client_credentials", "refresh_token", "password")
-//                .scopes("app");//客户端范围，名称自定义，必填*/
-//    }
-
-    //token的存储方法
-//    @Bean
-//    public InMemoryTokenStore tokenStore() {
-//        //将令牌存储到内存
-//        return new InMemoryTokenStore();
 
     @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints.tokenStore(tokenStore)
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
-
-        //添加异常处理
-        endpoints.exceptionTranslator(customWebResponseExceptionTranslator);
     }
 
     @Bean

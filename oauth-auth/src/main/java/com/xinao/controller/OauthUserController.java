@@ -3,16 +3,18 @@ package com.xinao.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.xinao.entity.AuthToken;
 import com.xinao.entity.LoginResult;
+import com.xinao.entity.UserSession;
 import com.xinao.service.AuthService;
 import com.xinao.utils.CookieUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
@@ -54,8 +56,8 @@ public class OauthUserController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public User login(Authentication auth) {
-        User user = (User) auth.getPrincipal();
+    public UserSession login(Authentication auth) {
+        UserSession user = (UserSession) auth.getPrincipal();
         return user;
     }
 

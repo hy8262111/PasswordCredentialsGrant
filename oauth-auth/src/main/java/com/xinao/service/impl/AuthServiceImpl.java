@@ -14,6 +14,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -42,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
         String clientId = loginResult.getClientId();
         String clientSecret = loginResult.getClientSecret();
         AuthToken authToken = applyToken(userName, password, clientId, clientSecret);
+        if(null == authToken){
+            //todo 申请令牌失败
+        }
         return authToken;
     }
 
@@ -69,7 +73,6 @@ public class AuthServiceImpl implements AuthService {
 
         //指定 restTemplate当遇到400或401响应时候也不要抛出异常，也要正常返回值
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
-
             @Override
             public void handleError(ClientHttpResponse response) throws IOException {
                 //当响应的值为400或401时候也要正常响应，不要抛出异常
@@ -84,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             exchange = restTemplate.exchange(authUrl, HttpMethod.POST, multiValueMapHttpEntity, Map.class);
         } catch (RestClientException e) {
+            e.printStackTrace();
             return null;
         }
 
@@ -94,26 +98,14 @@ public class AuthServiceImpl implements AuthService {
         String tokenType = (String) tokenInfo.get("token_type");
         Integer expiresIn = (Integer) tokenInfo.get("expires_in");
         String scope = (String) tokenInfo.get("scope");
-        /*if (StringUtils.isEmpty(access_token) ||
-                StringUtils.isEmpty(jwt_token) ||
-                StringUtils.isEmpty(refresh_token)) {
-
-            //当用户不存在要响应“用户不存在”
-            //"error_description" -> "UserDetailsService returned null, which is an interface contract violation"
-            String error_description = (String) body1.get("error_description");
-            if (error_description.indexOf("UserDetailsService returned null") >= 0) {
-                //说明用户不存在
-                ExceptionCast.cast(AuthCode.AUTH_ACCOUNT_NOTEXISTS);
-            } else if (error_description.indexOf("坏的凭证") >= 0) {
-                //当密码错误也要解析密码错误的信息，响应到客户端
-                //"error_description" -> "坏的凭证"
-                ExceptionCast.cast(AuthCode.AUTH_CREDENTIAL_ERROR);
-            } else {
-                ExceptionCast.cast(AuthCode.AUTH_LOGIN_ERROR);
+        if (StringUtils.isEmpty(accessToken) || StringUtils.isEmpty(refreshToken)) {
+            String code = (String )tokenInfo.get("code");
+            if("401".equals(code)){
+                //todo 抛出异常
+            }else{
+                //todo
             }
-
-        }*/
-        //将map中数据封装成AuthToken对象
+        }
         AuthToken authToken = new AuthToken();
         authToken.setAccessToken(accessToken);
         authToken.setRefreshToken(refreshToken);
