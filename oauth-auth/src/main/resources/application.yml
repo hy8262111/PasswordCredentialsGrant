@@ -12,6 +12,10 @@ spring:
         max-idle: 8
   application:
     name: user-auth
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 10.38.77.69:8848
   datasource:
     url: jdbc:mysql://localhost:3306/common_user?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
     username: root

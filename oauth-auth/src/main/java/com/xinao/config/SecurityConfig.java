@@ -1,4 +1,5 @@
 package com.xinao.config;
+
 import com.xinao.service.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -39,17 +41,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
 
-   @Override
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         /*http.authorizeRequests()
                 .and()
                 .httpBasic().and()
                 .csrf().disable();*/
 
-       http.requestMatchers().antMatchers(HttpMethod.OPTIONS, "/oauth/**")
-               .and().httpBasic().and()
-               .cors()
-               .and()
-               .csrf().disable();
+        http.requestMatchers().antMatchers(HttpMethod.OPTIONS, "/oauth/**")
+                .and().httpBasic().and()
+                .cors()
+                .and()
+                .csrf().disable();
+    }
+
+
+    @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers( "/v2/api-docs", "/swagger-resources/configuration/ui",
+                "/swagger-resources", "/swagger-resources/configuration/security",
+                "/swagger-ui.html", "/auth/login", "/auth/logout");
+
     }
 }

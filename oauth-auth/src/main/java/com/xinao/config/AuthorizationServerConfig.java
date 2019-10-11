@@ -45,7 +45,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private CustomWebResponseExceptionTranslator customWebResponseExceptionTranslator;
 
 
-
 //    @Override
 //    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 //        clients.withClientDetails(clientDetails());
@@ -94,10 +93,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         tokenServices.setTokenStore(tokenStore);
         tokenServices.setSupportRefreshToken(true);
         tokenServices.setClientDetailsService(clientDetails());
-        // token有效期自定义设置，默认12小时
-        tokenServices.setAccessTokenValiditySeconds(60 * 60 * 12);
-        //默认30天，这里修改
-        tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 7);
+        // token有效期自定义设置，默认12小时,设置为半小时
+        tokenServices.setAccessTokenValiditySeconds(60 * 30);
+        //默认30天，这里修改，设置为两小时
+        tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 2);
         return tokenServices;
     }
 
