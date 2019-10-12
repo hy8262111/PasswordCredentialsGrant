@@ -12,6 +12,9 @@ spring:
         max-idle: 8
   application:
     name: user-auth
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
   cloud:
     nacos:
       discovery:
@@ -21,6 +24,3 @@ spring:
     username: root
     password: root123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-
-
