@@ -1,6 +1,5 @@
 package com.xinao.service;
 
-import com.xinao.entity.AuthToken;
 import com.xinao.entity.LoginResult;
 
 /**
@@ -9,5 +8,5 @@ import com.xinao.entity.LoginResult;
  * @describe
  */
 public interface AuthService {
-    AuthToken login(LoginResult loginResult);
+    String login(LoginResult loginResult);
 }

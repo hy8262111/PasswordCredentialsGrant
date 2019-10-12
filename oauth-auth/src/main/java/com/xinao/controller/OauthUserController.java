@@ -1,7 +1,6 @@
 package com.xinao.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xinao.entity.AuthToken;
 import com.xinao.entity.LoginResult;
 import com.xinao.entity.UserSession;
 import com.xinao.service.AuthService;
@@ -9,7 +8,6 @@ import com.xinao.utils.CookieUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,27 +74,27 @@ public class OauthUserController extends BaseController {
 
 
     @PostMapping("/login")
-    public AuthToken login(LoginResult loginResult) {
+    public String login(LoginResult loginResult) {
         if (loginResult == null || StringUtils.isEmpty(loginResult.getUserName())) {
             //账号没有输入
         }
-        AuthToken authToken = authService.login(loginResult);
+        String token =  authService.login(loginResult);
 
         //存储令牌到cookkie中存储令牌到cookie
-        saveTokenToCookie(authToken.getAccessToken());
+        saveTokenToCookie(token);
 
-        return authToken;
+        return token;
     }
 
 
     //保存令牌到cookie
     private void saveTokenToCookie(String token) {
-        CookieUtil.addCookie(response, "/", "uid", token, 3600, false);
+        CookieUtil.addCookie(response, "/", "uid", token, 3600, true);
     }
 
     //清空cookie中得令牌
     private void clearToken() {
-        CookieUtil.addCookie(response, "/", "uid", "", 0, false);
+        CookieUtil.addCookie(response, "/", "uid", "", 0, true);
     }
 
 }

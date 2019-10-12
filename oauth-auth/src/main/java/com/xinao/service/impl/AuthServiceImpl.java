@@ -1,9 +1,11 @@
 package com.xinao.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.xinao.constance.ServiceNames;
-import com.xinao.entity.AuthToken;
 import com.xinao.entity.LoginResult;
 import com.xinao.service.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -31,39 +33,47 @@ import java.util.Map;
  */
 @Service
 public class AuthServiceImpl implements AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     LoadBalancerClient loadBalancerClient;
 
+    /**
+     * 获取令牌
+     * @param loginResult
+     * @return
+     */
     @Override
-    public AuthToken login(LoginResult loginResult) {
+    public String login(LoginResult loginResult) {
         String userName = loginResult.getUserName();
         String password = loginResult.getPassword();
         String clientId = loginResult.getClientId();
         String clientSecret = loginResult.getClientSecret();
-        AuthToken authToken = applyToken(userName, password, clientId, clientSecret);
-        if (null == authToken) {
-            //todo 申请令牌失败
-        }
-        return authToken;
+        String token = applyToken(userName, password, clientId, clientSecret);
+        return token;
     }
 
 
-    private AuthToken applyToken(String username, String password, String clientId, String clientSecret) {
+    private String applyToken(String username, String password, String clientId, String clientSecret) {
 
         //采用客户端负载均衡，从注册中心获取认证服务的ip 和端口
         ServiceInstance serviceInstance = loadBalancerClient.choose(ServiceNames.AUTH_SERVICE_NAME);
         URI uri = serviceInstance.getUri();
+
         String authUrl = uri + "/oauth/token";
+        logger.info("调用认证中心的客户端负载均衡地址，{}", authUrl);
 
         //请求的内容分两部分
         //1、header信息，包括了http basic认证信息
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        String httpbasic = httpbasic(clientId, clientSecret);
+
         //"Basic WGNXZWJBcHA6WGNXZWJBcHA="
+        String httpbasic = httpbasic(clientId, clientSecret);
+        logger.info("http basic认证信息，{}", httpbasic);
         headers.add("Authorization", httpbasic);
+
         //2、包括：grant_type、username、passowrd
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
@@ -95,14 +105,12 @@ public class AuthServiceImpl implements AuthService {
         // 返回的令牌信息
         Map tokenInfo = exchange.getBody();
         String accessToken = (String) tokenInfo.get("access_token");
-        String refreshToken = (String) tokenInfo.get("refresh_token");
-        String tokenType = (String) tokenInfo.get("token_type");
         Integer expiresIn = (Integer) tokenInfo.get("expires_in");
-        String scope = (String) tokenInfo.get("scope");
-        if (StringUtils.isEmpty(accessToken) || StringUtils.isEmpty(refreshToken)) {
+        logger.info("令牌过期时间设置，{}", expiresIn);
+
+        if (StringUtils.isEmpty(accessToken)) {
             //当用户不存在要响应“用户不存在”
             String errorDescription = (String) tokenInfo.get("error_description");
-            System.out.println(errorDescription);
             if (null == errorDescription) {
                 //todo 抛出异常 说明用户不存在
                 System.out.println("账号不存在");
@@ -116,13 +124,7 @@ public class AuthServiceImpl implements AuthService {
                 //todo
             }
         }
-        AuthToken authToken = new AuthToken();
-        authToken.setAccessToken(accessToken);
-        authToken.setRefreshToken(refreshToken);
-        authToken.setScope(scope);
-        authToken.setExpiresIn(expiresIn);
-        authToken.setTokenType(tokenType);
-        return authToken;
+        return accessToken;
     }
 
 
