@@ -1,5 +1,6 @@
 package com.xinao.service.impl;
 
+import com.xinao.constance.ServiceNames;
 import com.xinao.entity.AuthToken;
 import com.xinao.entity.LoginResult;
 import com.xinao.service.AuthService;
@@ -43,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
         String clientId = loginResult.getClientId();
         String clientSecret = loginResult.getClientSecret();
         AuthToken authToken = applyToken(userName, password, clientId, clientSecret);
-        if(null == authToken){
+        if (null == authToken) {
             //todo 申请令牌失败
         }
         return authToken;
@@ -53,9 +54,9 @@ public class AuthServiceImpl implements AuthService {
     private AuthToken applyToken(String username, String password, String clientId, String clientSecret) {
 
         //采用客户端负载均衡，从注册中心获取认证服务的ip 和端口
-        ServiceInstance serviceInstance = loadBalancerClient.choose("user-auth");
+        ServiceInstance serviceInstance = loadBalancerClient.choose(ServiceNames.AUTH_SERVICE_NAME);
         URI uri = serviceInstance.getUri();
-        String authUrl =uri+ "/oauth/token";
+        String authUrl = uri + "/oauth/token";
 
         //请求的内容分两部分
         //1、header信息，包括了http basic认证信息
@@ -99,10 +100,19 @@ public class AuthServiceImpl implements AuthService {
         Integer expiresIn = (Integer) tokenInfo.get("expires_in");
         String scope = (String) tokenInfo.get("scope");
         if (StringUtils.isEmpty(accessToken) || StringUtils.isEmpty(refreshToken)) {
-            String code = (String )tokenInfo.get("code");
-            if("401".equals(code)){
-                //todo 抛出异常
-            }else{
+            //当用户不存在要响应“用户不存在”
+            String errorDescription = (String) tokenInfo.get("error_description");
+            System.out.println(errorDescription);
+            if (null == errorDescription) {
+                //todo 抛出异常 说明用户不存在
+                System.out.println("账号不存在");
+            } else if ("Bad credentials".equalsIgnoreCase(errorDescription)) {
+                //todo 当密码错误也要解析密码错误的信息，响应到客户端
+                System.out.println("密码错误");
+            } else if (errorDescription.indexOf("Full authentication is required") >= 0) {
+                //todo appid错误
+                System.out.println("appId 或 appserect 错误");
+            } else {
                 //todo
             }
         }
@@ -116,7 +126,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    //拼接http basic认证串
+    /**
+     * 拼接http basic认证串
+     */
     private String httpbasic(String clientId, String clientSecret) {
         //将客户端id和客户端密码拼接，按“客户端id:客户端密码”
         String string = clientId + ":" + clientSecret;

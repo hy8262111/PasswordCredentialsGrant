@@ -17,8 +17,8 @@ import java.util.Set;
 public class UserSession extends User {
     private String userId;
     private String account;
-    private String Name;
-    private String TenantId;
+    private String name;
+    private String tenantId;
     private List<String> lists;
     private Set<String> sets;
     private String groups;

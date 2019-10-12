@@ -69,9 +69,9 @@ public class OauthUserController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    public JSONObject logout(String access_token) {
+    public JSONObject logout(String token) {
         //清空redis
-        consumerTokenServices.revokeToken(access_token);
+        consumerTokenServices.revokeToken(token);
         //清空cookie
         clearToken();
         return null;
