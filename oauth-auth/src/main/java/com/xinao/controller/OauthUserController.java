@@ -64,9 +64,6 @@ public class OauthUserController extends BaseController {
 
     /**
      * 用户登出接口，销毁redis，清空cookie
-     *
-     * @param access_token 必传access_token
-     * @return
      */
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public JSONObject logout(String token) {
